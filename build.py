@@ -60,13 +60,6 @@ Path("index.html").write_text(f"""<!doctype html>
 <ul class="post-list">
 {chr(10).join(entries)}
 </ul>
-
-<footer>
-  <p>
-    © Sommet Innovations — Open development notes. Not polished. Not final.
-  </p>
-</footer>
-
 </body>
 </html>
 """, encoding="utf-8")
