@@ -2,29 +2,49 @@ import markdown
 from pathlib import Path
 from collections import defaultdict
 
+# === FOLDERS ===
 DRAFTS = Path("drafts")
 POSTS = Path("posts")
 POSTS.mkdir(exist_ok=True)
 
-# Group posts by project
-projects = defaultdict(list)
+# === HARD-CODED PROJECT DEFINITIONS ===
+PROJECTS = {
+    "GradeSense": {
+        "title": "GradeSense",
+        "summary": "A terrain-aware ultramarathon pacing and finishing-time prediction model that integrates gradient, fitness, and fatigue dynamics.",
+        "progress": 10,  # percent
+        "status": "Active Research"
+    }
+}
+
+# === COLLECT POSTS BY PROJECT ===
+project_posts = defaultdict(list)
 
 for md in sorted(DRAFTS.glob("*.md"), reverse=True):
     text = md.read_text()
     lines = text.splitlines()
 
-    # Extract project tag
+    # --- Extract project tag ---
     project = None
     for line in lines[:5]:
         if line.lower().startswith("tags:"):
             project = line.split(":", 1)[1].strip()
             break
 
+    # Skip posts that aren't assigned to a known project
+    if project not in PROJECTS:
+        continue
+
+    # --- Convert markdown to HTML ---
     html_body = markdown.markdown(text, extensions=["extra"])
     date = md.stem
-    title = html_body.split("</h1>")[0].replace("<h1>", "") if "<h1>" in html_body else date
+    title = (
+        html_body.split("</h1>")[0].replace("<h1>", "")
+        if "<h1>" in html_body
+        else date
+    )
 
-    # Save post HTML
+    # --- Write per-post HTML ---
     out = POSTS / f"{date}.html"
     out.write_text(f"""<!doctype html>
 <html>
@@ -34,25 +54,54 @@ for md in sorted(DRAFTS.glob("*.md"), reverse=True):
   <link rel="stylesheet" href="../style.css">
 </head>
 <body>
-<header><a href="../index.html">← Development Log</a></header>
+
+<header>
+  <a href="../index.html">← Development Log</a>
+</header>
+
 <article>
 {html_body}
 </article>
-<footer><p>Sommet Innovations · Development Log · {date}</p></footer>
+
+<footer>
+  <p>Sommet Innovations · Development Log · {date}</p>
+</footer>
+
 </body>
 </html>
 """, encoding="utf-8")
 
-    # Add to projects dict
-    projects[project].append((date, title))
+    # --- Register post under project ---
+    project_posts[project].append((date, title))
 
-# === Generate index.html grouped by project ===
-index_entries = ""
-for project, posts_list in sorted(projects.items()):
-    index_entries += f"<h2>{project}</h2>\n<ul>\n"
-    for date, title in sorted(posts_list, reverse=True):
-        index_entries += f'<li><a href="posts/{date}.html">{title}</a> <small>{date}</small></li>\n'
-    index_entries += "</ul>\n"
+# === BUILD INDEX.HTML ===
+sections_html = ""
+
+for key, meta in PROJECTS.items():
+    posts = sorted(project_posts.get(key, []), reverse=True)
+
+    sections_html += f"""
+<section class="project">
+  <h2>{meta['title']}</h2>
+  <p class="summary">{meta['summary']}</p>
+
+  <div class="progress">
+    <div class="bar" style="width:{meta['progress']}%"></div>
+  </div>
+  <small>{meta['status']} · {meta['progress']}%</small>
+
+  <ul class="post-list">
+"""
+
+    for date, title in posts:
+        sections_html += f'''
+    <li><a href="posts/{date}.html">{title}</a> <small>{date}</small></li>
+'''
+
+    sections_html += """
+  </ul>
+</section>
+"""
 
 Path("index.html").write_text(f"""<!doctype html>
 <html>
@@ -62,11 +111,19 @@ Path("index.html").write_text(f"""<!doctype html>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header><h1>Sommet Innovations</h1></header>
+
+<header>
+  <h1>Sommet Innovations</h1>
+</header>
+
 <section class="about">
-  <p>This site documents ongoing research and development at <strong>Sommet Innovations</strong>.</p>
+  <p>
+    This site documents ongoing research and development at <strong>Sommet Innovations</strong>.
+  </p>
 </section>
-{index_entries}
+
+{sections_html}
+
 </body>
 </html>
 """, encoding="utf-8")
