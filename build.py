@@ -85,10 +85,15 @@ for key, meta in PROJECTS.items():
   <h2>{meta['title']}</h2>
   <p class="summary">{meta['summary']}</p>
 
-  <div class="progress">
-    <div class="bar" style="width:{meta['progress']}%"></div>
+  <div class="progress-wrapper">
+    <div class="progress">
+      <div class="bar" style="width:{meta['progress']}%">
+        <div class="bubble">
+          {meta['status']} · {meta['progress']}%
+        </div>
+      </div>
+    </div>
   </div>
-  <small>{meta['status']} · {meta['progress']}%</small>
 
   <ul class="post-list">
 """
