@@ -1,220 +1,295 @@
-/* =========================
-   GLOBAL RESET & BASE
-   ========================= */
+/* ========== GLOBAL BASE ========== */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 body {
-  max-width: 760px;
-  margin: 2rem auto;
-  padding: 0 1rem;
-  font-family: Verdana, Arial, sans-serif;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 2rem;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  color: #fff;
+  background: #000;
   line-height: 1.6;
-  background: #f4f4f4;
-  color: #000;
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 header {
-  border-bottom: 3px solid #000;
-  margin-bottom: 2rem;
-  padding-bottom: 0.5rem;
+  text-align: left;
+  margin-bottom: 3rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-section {
-  margin-bottom: 2.5rem;
+footer {
+  text-align: center;
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
-small {
-  color: #444;
-  font-size: 0.75rem;
-}
-
-/* =========================
-   HEADINGS
-   ========================= */
+/* ========== HEADINGS ========== */
 
 h1 {
-  font-family: "Arial Black", Impact, sans-serif;
-  font-size: 2rem;
-  letter-spacing: 1px;
-  margin: 0;
+  font-size: 2.75rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
 }
 
 h2 {
-  font-family: "Arial Black", Impact, sans-serif;
-  font-size: 1.3rem;
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+  font-size: 1.75rem;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  color: #fff;
+  margin-bottom: 0.75rem;
+  line-height: 1.2;
 }
 
 h3 {
-  font-size: 1rem;
-  margin-top: 1.5rem;
-}
-
-/* =========================
-   LINKS (classic web)
-   ========================= */
-
-a {
-  color: #0000ee;
-  text-decoration: underline;
-}
-
-a:visited {
-  color: #551a8b;
-}
-
-a:hover {
-  background: #ffffcc;
-}
-
-/* =========================
-   ABOUT SECTION
-   ========================= */
-
-.about {
-  border: 2px solid #000;
-  background: #ffffff;
-  padding: 1rem;
-}
-
-/* =========================
-   PROJECT SECTIONS
-   ========================= */
-
-.project {
-  border: 2px solid #000;
-  background: #ffffff;
-  padding: 1rem;
-}
-
-.project + .project {
-  margin-top: 3rem;
-}
-
-.project .summary {
-  max-width: 620px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: rgba(255, 255, 255, 0.9);
   margin-bottom: 0.75rem;
 }
 
-/* =========================
-   PROGRESS BAR (90s UI)
-   ========================= */
+/* ========== LINKS ========== */
 
-.progress-wrapper {
-  margin: 1rem 0 1.75rem 0;
-}
-
-.progress {
-  background: #c0c0c0;          /* Win95 gray */
-  border: 2px inset #808080;
-  height: 16px;
-  width: 100%;
-  max-width: 500px;
-  position: relative;
-}
-
-.progress .bar {
-  position: relative;
-  height: 100%;
-  background: repeating-linear-gradient(
-    45deg,
-    #333,
-    #333 4px,
-    #555 4px,
-    #555 8px
-  );
-}
-
-/* Speech bubble */
-.progress .bubble {
-  position: absolute;
-  top: -38px;
-  right: 0;
-  transform: translateX(50%);
-  background: #000;
+a {
   color: #fff;
-  padding: 4px 8px;
-  font-size: 0.75rem;
-  border: 2px solid #fff;
-  border-radius: 4px;
-  white-space: nowrap;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease-in-out;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  padding-bottom: 2px;
 }
 
-/* Bubble pointer */
-.progress .bubble::after {
-  content: "";
-  position: absolute;
-  bottom: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-width: 6px 6px 0 6px;
-  border-style: solid;
-  border-color: #000 transparent transparent transparent;
+a:visited {
+  color: rgba(255, 255, 255, 0.8);
 }
 
-.progress:hover .bubble {
+a:hover {
+  border-bottom-color: #fff;
+  transform: translateY(-1px);
+}
+
+header a {
+  border-bottom: none;
+  opacity: 0.6;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 400;
+}
+
+header a:hover {
   opacity: 1;
 }
 
-/* =========================
-   POST LISTS
-   ========================= */
+/* ========== ABOUT & PROJECT SECTIONS ========== */
+
+.about {
+  padding: 2rem 0;
+  margin-bottom: 2.5rem;
+  max-width: 800px;
+}
+
+.about p {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 400;
+}
+
+.about strong {
+  color: #fff;
+  font-weight: 500;
+}
+
+.project {
+  padding: 2rem 0;
+  margin-bottom: 2.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.project:first-of-type {
+  border-top: none;
+}
+
+.summary {
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 1.5rem;
+  max-width: 700px;
+  line-height: 1.6;
+  font-weight: 400;
+}
+
+/* ========== POST LIST ========== */
 
 .post-list {
-  list-style-type: square;
-  margin-left: 1.5rem;
-  padding-left: 0;
+  list-style-type: none;
+  padding: 0;
+  margin-top: 2rem;
 }
 
 .post-list li {
-  margin-bottom: 0.4rem;
+  margin: 0;
+  padding: 1.25rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-small {
-  color: #555;
+.post-list li:hover {
+  padding-left: 1rem;
+  background: rgba(255, 255, 255, 0.02);
 }
 
-/* =========================
-   ARTICLE PAGES
-   ========================= */
+.post-list li:last-child {
+  border-bottom: none;
+}
+
+.post-list li a {
+  border-bottom: none;
+  font-size: 1.125rem;
+  font-weight: 300;
+  flex: 1;
+}
+
+.post-list li small {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.875rem;
+  font-weight: 300;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  margin-left: 2rem;
+  white-space: nowrap;
+}
+
+/* ========== ARTICLE PAGE ========== */
 
 article {
-  border: 2px solid #000;
-  background: #ffffff;
-  padding: 1.25rem;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  color: rgba(255, 255, 255, 0.85);
 }
 
 article h1 {
-  font-size: 1.4rem;
-  margin-top: 0;
+  font-size: 2.5rem;
+  margin-bottom: 2rem;
+  font-weight: 300;
 }
 
-article p {
+article h2 {
+  margin-top: 3rem;
   margin-bottom: 1rem;
 }
 
-/* =========================
-   FOOTER
-   ========================= */
-
-footer {
-  border-top: 2px solid #000;
-  margin-top: 3rem;
-  padding-top: 0.5rem;
-  font-size: 0.75rem;
-  color: #333;
+article h3 {
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
 }
 
-/* =========================
-   OPTIONAL: CODE / MONO
-   ========================= */
+article p {
+  margin-bottom: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+  line-height: 1.8;
+}
 
-code, pre {
-  font-family: "Courier New", Courier, monospace;
-  background: #eeeeee;
-  border: 1px solid #999;
-  padding: 2px 4px;
+article ul, article ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+article li {
+  margin-bottom: 0.5rem;
+}
+
+/* ========== CODE BLOCKS ========== */
+
+code {
+  font-family: "SF Mono", Monaco, "Courier New", monospace;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.875em;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+pre {
+  font-family: "SF Mono", Monaco, "Courier New", monospace;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 8px;
+  overflow-x: auto;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+pre code {
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+/* ========== UTILITY ========== */
+
+small {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 300;
+}
+
+/* ========== RESPONSIVE ========== */
+
+@media (max-width: 768px) {
+  body {
+    padding: 2rem 1.5rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+  }
+  
+  .post-list li {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .post-list li small {
+    margin-left: 0;
+    margin-top: 0.5rem;
+  }
+  
+  article h1 {
+    font-size: 2rem;
+  }
+}
+
+/* ========== SMOOTH TRANSITIONS ========== */
+
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

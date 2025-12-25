@@ -12,8 +12,6 @@ PROJECTS = {
     "GradeSense": {
         "title": "GradeSense",
         "summary": "A terrain-aware ultramarathon pacing and finishing-time prediction model that integrates gradient, fitness, and fatigue dynamics.",
-        "progress": 10,  # percent
-        "status": "Active Research"
     }
 }
 
@@ -85,23 +83,10 @@ for key, meta in PROJECTS.items():
   <h2>{meta['title']}</h2>
   <p class="summary">{meta['summary']}</p>
 
-  <div class="progress-wrapper">
-    <div class="progress">
-      <div class="bar" style="width:{meta['progress']}%">
-        <div class="bubble">
-          {meta['status']} · {meta['progress']}%
-        </div>
-      </div>
-    </div>
-  </div>
-
   <ul class="post-list">
 """
-
     for date, title in posts:
-        sections_html += f'''
-    <li><a href="posts/{date}.html">{title}</a> <small>{date}</small></li>
-'''
+        sections_html += f'    <li><a href="posts/{date}.html">{title}</a> <small>{date}</small></li>\n'
 
     sections_html += """
   </ul>
