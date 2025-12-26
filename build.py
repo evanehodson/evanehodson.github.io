@@ -114,12 +114,7 @@ for md in sorted(DRAFTS.glob("*.md"), reverse=True):
 # Sort all sessions by date
 all_sessions = sorted([s for s in all_sessions if s["dt"]], key=lambda x: x["dt"], reverse=True)
 
-# === CALCULATE WEEKLY STATS ===
-now = datetime.now()
-week_start = now - timedelta(days=now.weekday())  # Monday
-week_sessions = [s for s in all_sessions if s["dt"] >= week_start]
-
-# Parse durations for weekly total
+# === DURATION PARSING ===
 def parse_duration(dur_str):
     """Convert '2h 30m' to minutes"""
     if not dur_str:
@@ -132,7 +127,6 @@ def parse_duration(dur_str):
         elif 'm' in part:
             total += int(part.replace('m', ''))
         elif i > 0 and parts[i-1].replace('.', '').isdigit():
-            # Handle "2 h 30 m" format
             if 'h' in part:
                 total += int(parts[i-1]) * 60
             elif 'm' in part:
@@ -152,29 +146,27 @@ def format_duration(minutes):
     else:
         return f"{mins}m"
 
+# === CALCULATE STATS ===
+now = datetime.now()
+
+# Weekly
+week_start = now - timedelta(days=now.weekday())
+week_sessions = [s for s in all_sessions if s["dt"] >= week_start]
 week_total_minutes = sum(parse_duration(s["duration"]) for s in week_sessions)
-week_total_formatted = format_duration(week_total_minutes)
 
-# Average session duration this week
-week_avg_minutes = week_total_minutes // len(week_sessions) if week_sessions else 0
-week_avg_formatted = format_duration(week_avg_minutes)
-
-# === CALCULATE MONTHLY STATS ===
+# Monthly
 month_start = now.replace(day=1)
 month_sessions = [s for s in all_sessions if s["dt"] >= month_start]
 month_total_minutes = sum(parse_duration(s["duration"]) for s in month_sessions)
 
-# === CALCULATE STREAK ===
+# Streak
 dates_with_sessions = sorted(set(s["dt"].date() for s in all_sessions if s["dt"]), reverse=True)
-
 current_streak = 0
 if dates_with_sessions:
     current_date = now.date()
-    # Check if there's a session today or yesterday (to not break streak)
     if dates_with_sessions[0] >= current_date - timedelta(days=1):
         current_streak = 1
         check_date = dates_with_sessions[0] - timedelta(days=1)
-        
         for session_date in dates_with_sessions[1:]:
             if session_date == check_date:
                 current_streak += 1
@@ -182,32 +174,17 @@ if dates_with_sessions:
             elif session_date < check_date:
                 break
 
-# Longest streak ever
-longest_streak = 0
-temp_streak = 1
-for i in range(len(dates_with_sessions) - 1):
-    if dates_with_sessions[i] - dates_with_sessions[i+1] == timedelta(days=1):
-        temp_streak += 1
-        longest_streak = max(longest_streak, temp_streak)
-    else:
-        temp_streak = 1
-longest_streak = max(longest_streak, temp_streak, current_streak)
-
-# === BUILD CALENDAR HEATMAP ===
-# Last 8 weeks
-calendar_html = '<div class="calendar">\n'
-calendar_html += '  <div class="calendar-labels">\n'
-calendar_html += '    <span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span>\n'
-calendar_html += '  </div>\n'
-
-# Get sessions count per day
+# === BUILD COMPACT CALENDAR (4 WEEKS) ===
 session_counts = defaultdict(int)
+session_details = defaultdict(list)
 for s in all_sessions:
     if s["dt"]:
-        session_counts[s["dt"].date()] += 1
+        day = s["dt"].date()
+        session_counts[day] += 1
+        session_details[day].append(s)
 
-# Generate 8 weeks of calendar
-for week_offset in range(7, -1, -1):
+calendar_html = '<div class="calendar">\n'
+for week_offset in range(3, -1, -1):
     week_start_date = now.date() - timedelta(days=now.weekday() + week_offset * 7)
     calendar_html += '  <div class="calendar-week">\n'
     
@@ -215,7 +192,6 @@ for week_offset in range(7, -1, -1):
         day_date = week_start_date + timedelta(days=day_offset)
         count = session_counts.get(day_date, 0)
         
-        # Determine intensity class
         if count == 0:
             intensity = "empty"
         elif count == 1:
@@ -225,82 +201,65 @@ for week_offset in range(7, -1, -1):
         else:
             intensity = "high"
         
-        # Don't show future dates
         if day_date > now.date():
             calendar_html += f'    <span class="calendar-day future"></span>\n'
         else:
-            calendar_html += f'    <span class="calendar-day {intensity}" title="{day_date}: {count} sessions"></span>\n'
+            # Build tooltip
+            tooltip = f"{day_date.strftime('%b %d, %Y')}"
+            if count > 0:
+                sessions = session_details[day_date]
+                total_mins = sum(parse_duration(s["duration"]) for s in sessions)
+                tooltip += f" • {count} session{'s' if count > 1 else ''} • {format_duration(total_mins)}"
+                for s in sessions:
+                    tooltip += f" • {s['title']}"
+            else:
+                tooltip += " • Rest day"
+            
+            calendar_html += f'    <span class="calendar-day {intensity}" data-date="{day_date}" data-tooltip="{tooltip}"></span>\n'
     
     calendar_html += '  </div>\n'
-
 calendar_html += '</div>\n'
 
-# === WEEKLY BANNER ===
-week_banner = f"""
-<div class="weekly-banner">
-  <div class="banner-stat">
-    <div class="banner-value">{len(week_sessions)}</div>
-    <div class="banner-label">Sessions This Week</div>
+# === COMPACT DASHBOARD ===
+dashboard_html = f"""
+<div class="dashboard">
+  <div class="dashboard-stats">
+    <div class="stat-tile">
+      <div class="stat-value">{len(week_sessions)}</div>
+      <div class="stat-label">Sessions This Week</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">{format_duration(week_total_minutes)}</div>
+      <div class="stat-label">Weekly Time</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">{len(month_sessions)}</div>
+      <div class="stat-label">Sessions This Month</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">{format_duration(month_total_minutes)}</div>
+      <div class="stat-label">Monthly Time</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">{current_streak}</div>
+      <div class="stat-label">Day Streak</div>
+    </div>
   </div>
-  <div class="banner-stat">
-    <div class="banner-value">{week_total_formatted}</div>
-    <div class="banner-label">Total Time</div>
-  </div>
-  <div class="banner-stat">
-    <div class="banner-value">{week_avg_formatted}</div>
-    <div class="banner-label">Avg Per Session</div>
+  
+  <div class="dashboard-calendar">
+    <h3>Last 4 Weeks</h3>
+    {calendar_html}
   </div>
 </div>
 """
 
-# === MONTHLY STATS SECTION ===
-monthly_stats = f"""
-<section class="monthly-stats">
-  <h2>Monthly Overview — {now.strftime('%B %Y').upper()}</h2>
-  
-  <div class="stats-grid">
-    <div class="stat-box">
-      <div class="stat-value">{len(month_sessions)}</div>
-      <div class="stat-label">Sessions</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value">{format_duration(month_total_minutes)}</div>
-      <div class="stat-label">Total Time</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value">{current_streak}</div>
-      <div class="stat-label">Current Streak</div>
-    </div>
-    <div class="stat-box">
-      <div class="stat-value">{longest_streak}</div>
-      <div class="stat-label">Longest Streak</div>
-    </div>
-  </div>
-  
-  <div class="calendar-container">
-    <h3>Last 8 Weeks</h3>
-    {calendar_html}
-    <div class="calendar-legend">
-      <span>Less</span>
-      <span class="legend-box empty"></span>
-      <span class="legend-box low"></span>
-      <span class="legend-box medium"></span>
-      <span class="legend-box high"></span>
-      <span>More</span>
-    </div>
-  </div>
-</section>
-"""
-
 # === RECENT SESSIONS ===
 recent_activity = all_sessions[:10]
-
 recent_html = """
 <section class="recent-sessions">
   <h2>Recent Sessions</h2>
   <ul class="post-list">
 """
-
 for session in recent_activity:
     emoji = PROJECTS[session["project"]].get("emoji", "📝")
     recent_html += f"""    <li>
@@ -311,7 +270,6 @@ for session in recent_activity:
       </a>
     </li>
 """
-
 recent_html += """
   </ul>
 </section>
@@ -321,7 +279,6 @@ recent_html += """
 projects_html = ""
 for key, meta in PROJECTS.items():
     posts = sorted(project_posts.get(key, []), key=lambda x: x["date"], reverse=True)
-    
     if not posts:
         continue
     
@@ -346,7 +303,6 @@ for key, meta in PROJECTS.items():
       <a href="posts/{post['date']}.html">{post['title']}</a>
     </li>
 """
-
     projects_html += """
   </ul>
 </section>
@@ -368,9 +324,7 @@ Path("index.html").write_text(f"""<!doctype html>
   <p>Sommet Innovations</p>
 </header>
 
-{week_banner}
-
-{monthly_stats}
+{dashboard_html}
 
 {recent_html}
 
@@ -385,5 +339,5 @@ Path("index.html").write_text(f"""<!doctype html>
 """, encoding="utf-8")
 
 print(f"[OK] Built {len(all_sessions)} sessions across {len(project_posts)} projects")
-print(f"[OK] This week: {len(week_sessions)} sessions, {week_total_formatted}")
+print(f"[OK] This week: {len(week_sessions)} sessions, {format_duration(week_total_minutes)}")
 print(f"[OK] Current streak: {current_streak} days")

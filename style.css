@@ -18,7 +18,7 @@ body {
 }
 
 header {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 header h1 {
@@ -91,132 +91,94 @@ a:visited {
   color: #ccc;
 }
 
-/* ========== SECTIONS ========== */
+/* ========== COMPACT DASHBOARD ========== */
 
-/* Weekly Banner - Large Numbers */
-.weekly-banner {
+.dashboard {
+  margin: 0 0 2.5rem 0;
+  padding: 1.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid #222;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 2fr 1fr;
   gap: 2rem;
-  margin: 2rem 0 3rem 0;
-  padding: 2rem 0;
-  border-top: 1px solid #222;
-  border-bottom: 1px solid #222;
+  align-items: start;
 }
 
-.banner-stat {
+.dashboard-stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+
+.stat-tile {
   text-align: center;
+  padding: 0.75rem 0.5rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid #1a1a1a;
 }
 
-.banner-value {
-  font-size: 48px;
+.stat-value {
+  font-size: 24px;
   color: #fff;
   font-weight: normal;
-  margin-bottom: 0.5rem;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+  margin-bottom: 0.4rem;
 }
 
-.banner-label {
-  font-size: 12px;
+.stat-label {
+  font-size: 10px;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.1em;
 }
 
-/* Monthly Stats Section */
-.monthly-stats {
-  margin-bottom: 3rem;
-  padding: 2rem 0;
-  border-bottom: 1px solid #222;
+/* ========== COMPACT CALENDAR ========== */
+
+.dashboard-calendar {
+  padding-left: 2rem;
+  border-left: 1px solid #1a1a1a;
 }
 
-.monthly-stats h2 {
-  margin-bottom: 1.5rem;
-  font-size: 13px;
-}
-
-.monthly-stats h3 {
-  font-size: 13px;
-  color: #666;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1rem;
-  margin-top: 2rem;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-box {
-  text-align: center;
-  padding: 1rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid #222;
-}
-
-.stat-box .stat-value {
-  font-size: 32px;
-  color: #fff;
-  font-weight: normal;
-  margin-bottom: 0.5rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-box .stat-label {
+.dashboard-calendar h3 {
   font-size: 11px;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-}
-
-/* Calendar Heatmap */
-.calendar-container {
-  margin-top: 2rem;
+  margin-bottom: 1rem;
+  margin-top: 0;
 }
 
 .calendar {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  margin: 1rem 0;
-}
-
-.calendar-labels {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
-  margin-bottom: 5px;
-  padding-left: 0;
-}
-
-.calendar-labels span {
-  text-align: center;
-  font-size: 11px;
-  color: #555;
-  text-transform: uppercase;
+  gap: 2px;
 }
 
 .calendar-week {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 3px;
+  gap: 2px;
 }
 
 .calendar-day {
   aspect-ratio: 1;
   background: #111;
-  border: 1px solid #222;
-  cursor: default;
+  border: 1px solid #1a1a1a;
+  cursor: pointer;
+  position: relative;
+  transition: transform 0.1s, border-color 0.2s;
+}
+
+.calendar-day:hover {
+  transform: scale(1.15);
+  z-index: 10;
+  border-color: #fff;
 }
 
 .calendar-day.empty {
-  background: #111;
-  border-color: #1a1a1a;
+  background: #0a0a0a;
+  border-color: #151515;
 }
 
 .calendar-day.low {
@@ -237,41 +199,52 @@ a:visited {
 .calendar-day.future {
   background: transparent;
   border-color: #0a0a0a;
+  cursor: default;
 }
 
-.calendar-legend {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.calendar-day.future:hover {
+  transform: none;
+  border-color: #0a0a0a;
+}
+
+/* Tooltip */
+.calendar-day::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-8px);
+  background: #000;
+  border: 1px solid #fff;
+  padding: 0.5rem 0.75rem;
+  white-space: pre-line;
   font-size: 11px;
-  color: #555;
-  margin-top: 1rem;
-  justify-content: flex-end;
+  line-height: 1.4;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+  z-index: 100;
+  min-width: 200px;
+  text-align: left;
 }
 
-.legend-box {
-  width: 12px;
-  height: 12px;
-  border: 1px solid #222;
+.calendar-day:hover::after {
+  opacity: 1;
 }
 
-.legend-box.empty {
-  background: #111;
+.calendar-day.future::after {
+  display: none;
 }
 
-.legend-box.low {
-  background: #1a3a1a;
+/* Desktop layout - horizontal */
+@media (min-width: 769px) {
+  .dashboard {
+    grid-template-columns: 2fr 1fr;
+  }
 }
 
-.legend-box.medium {
-  background: #2a5a2a;
-}
+/* ========== RECENT SESSIONS ========== */
 
-.legend-box.high {
-  background: #3a7a3a;
-}
-
-/* Recent Sessions Section */
 .recent-sessions {
   margin-bottom: 3rem;
 }
@@ -320,7 +293,7 @@ a:visited {
   margin-right: 0.5rem;
 }
 
-/* ========== POST LIST (Training Log Style) ========== */
+/* ========== POST LIST ========== */
 
 .post-list {
   list-style-type: none;
@@ -339,7 +312,6 @@ a:visited {
   border-bottom: none;
 }
 
-/* Timeline marker */
 .post-list li::before {
   content: "•";
   position: absolute;
@@ -372,7 +344,7 @@ a:visited {
   color: #fff;
 }
 
-/* ========== ARTICLE PAGE (Session Details) ========== */
+/* ========== ARTICLE PAGE ========== */
 
 article {
   color: #ccc;
@@ -407,7 +379,7 @@ article .duration {
 }
 
 article .session-content h1 {
-  display: none; /* Hide duplicate title from markdown */
+  display: none;
 }
 
 article h2 {
@@ -443,7 +415,6 @@ article li {
   margin-bottom: 0.5rem;
 }
 
-/* Stats/metrics style */
 article strong {
   color: #fff;
   font-weight: normal;
@@ -481,6 +452,40 @@ small {
     font-size: 16px;
   }
   
+  .dashboard {
+    padding: 1rem;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .dashboard-calendar {
+    padding-left: 0;
+    padding-top: 1.5rem;
+    border-left: none;
+    border-top: 1px solid #1a1a1a;
+  }
+  
+  .dashboard-stats {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  
+  .stat-tile {
+    padding: 0.5rem 0.25rem;
+  }
+  
+  .stat-value {
+    font-size: 20px;
+  }
+  
+  .stat-label {
+    font-size: 9px;
+  }
+  
+  .dashboard-calendar h3 {
+    font-size: 10px;
+  }
+  
   .post-list li {
     padding-left: 1.25rem;
   }
@@ -491,25 +496,5 @@ small {
   
   article h1 {
     font-size: 18px;
-  }
-  
-  .banner-value {
-    font-size: 36px;
-  }
-  
-  .weekly-banner {
-    gap: 1rem;
-  }
-  
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .stat-box .stat-value {
-    font-size: 24px;
-  }
-  
-  .calendar-labels span {
-    font-size: 10px;
   }
 }
