@@ -40,8 +40,16 @@ for md in sorted(DRAFTS.glob("*.md"), reverse=True):
     if project not in PROJECTS:
         continue
 
+    # --- Remove metadata lines from content ---
+    content_lines = []
+    for line in lines:
+        if not (line.lower().startswith("tags:") or line.lower().startswith("duration:")):
+            content_lines.append(line)
+    
+    clean_text = "\n".join(content_lines)
+
     # --- Convert markdown to HTML ---
-    html_body = markdown.markdown(text, extensions=["extra"])
+    html_body = markdown.markdown(clean_text, extensions=["extra"])
     date = md.stem
     
     # Parse title
@@ -81,7 +89,6 @@ for md in sorted(DRAFTS.glob("*.md"), reverse=True):
   <header>
     <small>{formatted_date} • {day_name}</small>
     <h1>{title}</h1>
-    {f'<p class="duration">Duration: {duration}</p>' if duration else ''}
   </header>
   
   <div class="session-content">
@@ -159,11 +166,15 @@ month_start = now.replace(day=1)
 month_sessions = [s for s in all_sessions if s["dt"] >= month_start]
 month_total_minutes = sum(parse_duration(s["duration"]) for s in month_sessions)
 
-# Streak
+# Streaks
 dates_with_sessions = sorted(set(s["dt"].date() for s in all_sessions if s["dt"]), reverse=True)
+
 current_streak = 0
+longest_streak = 0
+
 if dates_with_sessions:
     current_date = now.date()
+    # Current streak
     if dates_with_sessions[0] >= current_date - timedelta(days=1):
         current_streak = 1
         check_date = dates_with_sessions[0] - timedelta(days=1)
@@ -173,6 +184,16 @@ if dates_with_sessions:
                 check_date -= timedelta(days=1)
             elif session_date < check_date:
                 break
+    
+    # Longest streak
+    temp_streak = 1
+    for i in range(len(dates_with_sessions) - 1):
+        if dates_with_sessions[i] - dates_with_sessions[i+1] == timedelta(days=1):
+            temp_streak += 1
+        else:
+            longest_streak = max(longest_streak, temp_streak)
+            temp_streak = 1
+    longest_streak = max(longest_streak, temp_streak, current_streak)
 
 # === BUILD COMPACT CALENDAR (4 WEEKS) ===
 session_counts = defaultdict(int)
@@ -204,18 +225,30 @@ for week_offset in range(3, -1, -1):
         if day_date > now.date():
             calendar_html += f'    <span class="calendar-day future"></span>\n'
         else:
-            # Build tooltip
-            tooltip = f"{day_date.strftime('%b %d, %Y')}"
+            # Build tooltip content
             if count > 0:
                 sessions = session_details[day_date]
                 total_mins = sum(parse_duration(s["duration"]) for s in sessions)
-                tooltip += f" • {count} session{'s' if count > 1 else ''} • {format_duration(total_mins)}"
+                tooltip_header = f"{day_date.strftime('%b %d, %Y')} • {count} session{'s' if count > 1 else ''} • {format_duration(total_mins)}"
+                
+                # Build links HTML
+                links_html = ""
                 for s in sessions:
-                    tooltip += f" • {s['title']}"
+                    links_html += f'<a href="posts/{s["date"]}.html">{s["title"]}</a>'
+                
+                calendar_html += f'    <span class="calendar-day {intensity}" data-tooltip-header="{tooltip_header}">\n'
+                calendar_html += f'      <span class="calendar-tooltip">\n'
+                calendar_html += f'        <span class="tooltip-header">{tooltip_header}</span>\n'
+                calendar_html += f'        <span class="tooltip-links">{links_html}</span>\n'
+                calendar_html += f'      </span>\n'
+                calendar_html += f'    </span>\n'
             else:
-                tooltip += " • Rest day"
-            
-            calendar_html += f'    <span class="calendar-day {intensity}" data-date="{day_date}" data-tooltip="{tooltip}"></span>\n'
+                tooltip_header = f"{day_date.strftime('%b %d, %Y')} • Rest day"
+                calendar_html += f'    <span class="calendar-day {intensity}">\n'
+                calendar_html += f'      <span class="calendar-tooltip">\n'
+                calendar_html += f'        <span class="tooltip-header">{tooltip_header}</span>\n'
+                calendar_html += f'      </span>\n'
+                calendar_html += f'    </span>\n'
     
     calendar_html += '  </div>\n'
 calendar_html += '</div>\n'
@@ -242,7 +275,11 @@ dashboard_html = f"""
     </div>
     <div class="stat-tile">
       <div class="stat-value">{current_streak}</div>
-      <div class="stat-label">Day Streak</div>
+      <div class="stat-label">Current Streak</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-value">{longest_streak}</div>
+      <div class="stat-label">Longest Streak</div>
     </div>
   </div>
   
@@ -313,15 +350,15 @@ Path("index.html").write_text(f"""<!doctype html>
 <html>
 <head>
   <meta charset="utf-8">
-  <title>Development Log — Sommet Innovations</title>
+  <title>Sommet Innovations Devlog</title>
   <link rel="stylesheet" href="style.css">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
 
 <header>
-  <h1>Development Log</h1>
-  <p>Sommet Innovations</p>
+  <h1>Sommet Innovations</h1>
+  <p>Development Log</p>
 </header>
 
 {dashboard_html}
@@ -340,4 +377,4 @@ Path("index.html").write_text(f"""<!doctype html>
 
 print(f"[OK] Built {len(all_sessions)} sessions across {len(project_posts)} projects")
 print(f"[OK] This week: {len(week_sessions)} sessions, {format_duration(week_total_minutes)}")
-print(f"[OK] Current streak: {current_streak} days")
+print(f"[OK] Current streak: {current_streak} days | Longest: {longest_streak} days")
