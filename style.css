@@ -440,6 +440,14 @@ article strong {
   font-weight: normal;
 }
 
+article img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1.5rem 0;
+  border: 1px solid #222;
+}
+
 /* ========== CODE BLOCKS ========== */
 
 code, pre {

@@ -50,6 +50,10 @@ for md in sorted(DRAFTS.glob("*.md"), reverse=True):
 
     # --- Convert markdown to HTML ---
     html_body = markdown.markdown(clean_text, extensions=["extra"])
+
+    # --- Fix image paths for posts subfolder ---
+    html_body = html_body.replace('src="images/', 'src="../images/')
+
     date = md.stem
     
     # Parse title
