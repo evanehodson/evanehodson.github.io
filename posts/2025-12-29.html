@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Title - A short summary of what you did — Dev Log</title>
+  <link rel="stylesheet" href="../style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<header>
+  <a href="../index.html">← Back to Log</a>
+</header>
+
+<article>
+  <header>
+    <small>29 DEC 2025 • Monday</small>
+    <h1>Title - A short summary of what you did</h1>
+  </header>
+  
+  <div class="session-content">
+<h1>Title - A short summary of what you did</h1>
+<p>2025-12-29</p>
+<h2>TL;DR</h2>
+<ul>
+<li>Downloaded OSM trail vectors for Javelina Jundred. </li>
+<li>Downloaded 10m DEM for McDowell Mountain Regional Park.</li>
+<li>Still wondering how I'm going to do multiple loops.</li>
+<li>Switched to hosting my website privately.</li>
+</ul>
+<h2>The Long Story</h2>
+<p>I began the process of pulling OSM trail vectors for the Javelina Jundred course. At this point, I have all the physical trail data I need, along with a 10 m DEM of McDowell Mountain Regional Park. The remaining open problem is conceptual rather than technical: how to define and encode multiple laps of a partially reused trail network in a way that collapses cleanly into a single 1D elevation profile. I can solve this, but it requires some careful thought about representation and ordering rather than brute force computation. Thatâ€™s work better done slowly, so Iâ€™m pushing it to tomorrow.</p>
+<p>The more important work today was architectural. I moved this website off GitHub Pages and into a private hosting environment. GitHub Pages is good for static content, but it constrains what can live behind it. I want the freedom to run Node.js, render interactive 3D maps, and, eventually, host a model in a way that is both usable and secure. That simply isnâ€™t compatible with a fully static, fully public setup.</p>
+<p>I strongly believe in open science. I plan to share what I learn, document methods, explain assumptions, and publish results in a way that others can reproduce. At the same time, openness does not require self-sabotage. There is a meaningful distinction between sharing insights and giving away the entire mechanism that produces them.</p>
+<p>Modelsâ€”especially ones that take time, iteration, and domain-specific judgment to buildâ€”are labor. By hosting privately, I can be transparent about inputs, reasoning, and outcomes while still protecting the part of the system that represents the bulk of the investment. This strikes me as the most honest middle ground: open enough to contribute, closed enough to endure.</p>
+  </div>
+</article>
+
+<footer>
+  <p>Session logged: 29 DEC 2025</p>
+</footer>
+
+</body>
+</html>
