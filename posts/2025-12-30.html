@@ -1,0 +1,46 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GIS Pipeline Development — Dev Log</title>
+  <link rel="stylesheet" href="../style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<header>
+  <a href="../index.html">← Back to Log</a>
+</header>
+
+<article>
+  <header>
+    <small>30 DEC 2025 • Tuesday</small>
+    <h1>GIS Pipeline Development</h1>
+  </header>
+  
+  <div class="session-content">
+<h1>GIS Pipeline Development</h1>
+<p>2025-12-30</p>
+<h2>TL;DR</h2>
+<ul>
+<li>Snapped GPX tracks to OSM trails for accurate alignment.  </li>
+<li>Developed a method to detect start/finish crossings by analyzing distance to a reference point, then split the course into individual laps.  </li>
+<li>Pipeline is conceptually ready for full automation; explored manually first to validate.</li>
+</ul>
+<h2>The Long Story</h2>
+<p>It had been a while since I used QGIS, so I started out a little rusty and lost some time trying to combine layers with different coordinate systems. Once that was sorted, I got a clean line snapped to OSM trails. This alone is a big win for accuracy: the GPX now adheres exactly to the physical trail network, which makes everything downstream much more reliable.</p>
+<p><img alt="Snapped GPX" src="../images/snapped_GPX.PNG" /></p>
+<p>The main challenge was splitting the laps. After snapping, all lap starts looked almost identical, and variations in lap distance meant I couldn't just cut the line every fixed number of miles. The approach I settled on was to analyze the snapped line densely, measuring the distance from every step to a fixed reference at the start/finish. By detecting <strong>local minima under a tight tolerance</strong>, I could identify every crossing of the start/finish line. Finally, I map those crossings back to the original line coordinates to create separate lap segments.</p>
+<p>I like this hands-on approach. Messing with the data manually first helps me understand what's happening, so that when I eventually automate the full pipeline—snapping GPX, extracting terrain, splitting laps—it will be straightforward and reliable. Conceptually, the pipeline is now: snap GPX to OSM, identify start/finish crossings by local minima of distance to a reference point, split into laps, and then eventually fold in terrain analysis and 1D elevation profiles. For now, clarity and correctness take priority over automation.</p>
+<p>I also started building the web app for the map. The hope is to eventually have a 3D version of the map you can fly through, a 2D version you can use for directions (to download directions .FIT or .GPX files, for example), and a 1D version for elevation, slope, etc. The <a href="GradeSenseDemo.html">GradeSense Map Demo</a> is live, though it is quite embarassing.   </p>
+<p>Here's a snapshot to look back on:</p>
+<p><img alt="Map Demo" src="../images/msedge_Pd4oEilnq2.gif" /></p>
+  </div>
+</article>
+
+<footer>
+  <p>Session logged: 30 DEC 2025</p>
+</footer>
+
+</body>
+</html>

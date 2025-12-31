@@ -23,7 +23,7 @@ project_posts = defaultdict(list)
 all_sessions = []
 
 for md in sorted(DRAFTS.glob("*.md"), reverse=True):
-    text = md.read_text()
+    text = md.read_text(encoding="utf-8")
     lines = text.splitlines()
 
     # --- Extract metadata ---
@@ -363,6 +363,9 @@ Path("index.html").write_text(f"""<!doctype html>
 <header>
   <h1>Sommet Innovations</h1>
   <p>Development Log</p>
+  <nav class="top-nav">
+    <a href="GradeSenseDemo.html">⛰️ GradeSense (Map Demo)</a>
+  </nav>
 </header>
 
 {dashboard_html}
