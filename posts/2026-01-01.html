@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Terrain Tiles Pipeline — Devlog</title>
+  <link rel="stylesheet" href="../style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+
+<header>
+  <a href="../devlog.html">← Back to Devlog</a>
+</header>
+
+<article>
+  <header>
+    <small>01 JAN 2026 • Thursday</small>
+    <h1>Terrain Tiles Pipeline</h1>
+  </header>
+
+  <div class="post-content">
+<h1>Terrain Tiles Pipeline</h1>
+<p><strong>2026-01-01</strong>  </p>
+<h2>TL;DR</h2>
+<ul>
+<li>Flythrough looks better.  </li>
+<li>Started building full pipeline: GPX → DEM → RGB → tiles.</li>
+</ul>
+<h2>The Long Story</h2>
+<p>Made some progress today. Added a satellite background so it doesn’t look so blocky, but that’s not enough. The main problem is DEM resolution. It’s too rough. We’ll need to do some heavy smoothing. More tiles could help too. Thinking of going up to zoom 18.  </p>
+<p>The pipeline is starting to take shape: GPX → DEM → RGB → tiles. The script works, but <code>gdal2tiles</code> is still giving me problems. Need to figure that out.  </p>
+<p>Overall, moving forward slowly but it’s starting to look like something. Next steps: smoothing and getting tiles to generate properly.</p>
+  </div>
+</article>
+
+<footer>
+  <p>Sommet Innovations</p>
+</footer>
+
+</body>
+</html>

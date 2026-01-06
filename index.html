@@ -8,39 +8,67 @@
   <!-- MapLibre -->
   <script src="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.js"></script>
   <link href="https://unpkg.com/maplibre-gl@^5.15.0/dist/maplibre-gl.css" rel="stylesheet" />
-  <!-- Turf.js for bearing calculations -->
+  <!-- Turf.js -->
   <script src="https://cdn.jsdelivr.net/npm/@turf/turf@7/turf.min.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    #map { width: 100%; height: 50vh; margin-bottom: 2rem; border: 1px solid #222; position: relative; }
+    #map { 
+      width: 100%; 
+      height: 50vh; 
+      margin-bottom: 2rem; 
+      border: 1px solid #222; 
+      position: relative;
+      transform: translateZ(0);
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    #map canvas {
+      image-rendering: auto !important;
+      -ms-interpolation-mode: bicubic;
+      transform: translateZ(0);
+      backface-visibility: hidden;
+      perspective: 1000px;
+    }
+    
     #elevation { width: 100%; height: 25vh; margin-bottom: 2rem; }
     nav { margin-bottom: 2rem; display: flex; gap: 1rem; }
     
-    /* Controls overlay */
     .map-controls {
       position: absolute;
-      bottom: 20px;
+      bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
       z-index: 10;
-      background: rgba(0,0,0,0.8);
-      padding: 15px 25px;
+      background: rgba(0,0,0,0.85);
+      padding: 10px 15px;
       border-radius: 8px;
       display: flex;
-      gap: 15px;
+      gap: 10px;
       align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+      transition: all 0.3s ease;
+    }
+    
+    .map-controls.minimized {
+      padding: 8px 12px;
+    }
+    
+    .map-controls.minimized .expandable {
+      display: none;
     }
     
     .map-controls button {
       background: #4a8a4a;
       color: white;
       border: none;
-      padding: 10px 20px;
+      padding: 8px 16px;
       border-radius: 5px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: bold;
+      transition: all 0.2s;
+      white-space: nowrap;
     }
     
     .map-controls button:hover {
@@ -51,9 +79,135 @@
       background: #ff4444;
     }
     
+    .map-controls button.small {
+      padding: 5px 10px;
+      font-size: 11px;
+    }
+    
+    .map-controls button.icon {
+      padding: 6px 10px;
+      font-size: 14px;
+    }
+    
     .map-controls .info {
       color: #ccc;
-      font-size: 13px;
+      font-size: 12px;
+      min-width: 80px;
+    }
+    
+    .slider-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .slider-group label {
+      color: #aaa;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+    
+    .slider-group input[type="range"] {
+      width: 80px;
+      cursor: pointer;
+      height: 4px;
+    }
+    
+    .divider {
+      width: 1px;
+      height: 25px;
+      background: #555;
+      margin: 0 5px;
+    }
+    
+    /* Camera control wheel */
+    .camera-wheel {
+      position: absolute;
+      bottom: 90px;
+      right: 20px;
+      width: 120px;
+      height: 120px;
+      z-index: 10;
+    }
+    
+    .wheel-center {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      border: 2px solid #4a8a4a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #4a8a4a;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    
+    .wheel-btn {
+      position: absolute;
+      width: 35px;
+      height: 35px;
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #4a8a4a;
+      border-radius: 5px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      user-select: none;
+    }
+    
+    .wheel-btn:hover {
+      background: #4a8a4a;
+      transform: scale(1.1);
+    }
+    
+    .wheel-btn:active {
+      background: #5a9a5a;
+    }
+    
+    .wheel-up { top: 0; left: 50%; transform: translateX(-50%); }
+    .wheel-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+    .wheel-left { left: 0; top: 50%; transform: translateY(-50%); }
+    .wheel-right { right: 0; top: 50%; transform: translateY(-50%); }
+    
+    /* Zoom controls */
+    .zoom-controls {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      z-index: 10;
+    }
+    
+    .zoom-btn {
+      width: 35px;
+      height: 35px;
+      background: rgba(0,0,0,0.8);
+      border: 2px solid #4a8a4a;
+      border-radius: 5px;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      font-weight: bold;
+    }
+    
+    .zoom-btn:hover {
+      background: #4a8a4a;
     }
   </style>
 </head>
@@ -71,11 +225,42 @@
 </section>
 <article>
   <div id="map">
-    <div class="map-controls">
-      <button id="toggleFly">Start Flythrough</button>
+    <div class="map-controls" id="controls">
+      <button id="toggleFly">▶ Start</button>
       <div class="info">
         <span id="progressText">Ready</span>
       </div>
+      
+      <div class="divider expandable"></div>
+      
+      <div class="slider-group expandable">
+        <label>Speed:</label>
+        <input type="range" id="speedSlider" min="0" max="100" step="1" value="50">
+        <span id="speedValue" style="color: #ccc; font-size: 11px; min-width: 40px;">10.0x</span>
+      </div>
+      
+      <div class="divider expandable"></div>
+      
+      <button id="resetBtn" class="small expandable">↺ Reset</button>
+      
+      <div class="divider"></div>
+      
+      <button id="toggleMinimize" class="icon">⚙</button>
+    </div>
+    
+    <!-- Camera Control Wheel -->
+    <div class="camera-wheel">
+      <div class="wheel-center">⊙</div>
+      <div class="wheel-btn wheel-up" id="wheelForward">▲</div>
+      <div class="wheel-btn wheel-down" id="wheelBack">▼</div>
+      <div class="wheel-btn wheel-left" id="wheelRotLeft">◄</div>
+      <div class="wheel-btn wheel-right" id="wheelRotRight">►</div>
+    </div>
+    
+    <!-- Zoom Controls -->
+    <div class="zoom-controls">
+      <div class="zoom-btn" id="zoomIn">+</div>
+      <div class="zoom-btn" id="zoomOut">−</div>
     </div>
   </div>
   <canvas id="elevation"></canvas>
@@ -84,14 +269,78 @@
   <p>© 2026 Sommet Innovations.</p>
 </footer>
 <script>
+// Bilinear interpolation for DEM upscaling
+function bilinearInterpolate(data, width, height, x, y) {
+  const x1 = Math.floor(x);
+  const x2 = Math.min(x1 + 1, width - 1);
+  const y1 = Math.floor(y);
+  const y2 = Math.min(y1 + 1, height - 1);
+  
+  const fx = x - x1;
+  const fy = y - y1;
+  
+  const v11 = data[y1 * width + x1] || 0;
+  const v21 = data[y1 * width + x2] || 0;
+  const v12 = data[y2 * width + x1] || 0;
+  const v22 = data[y2 * width + x2] || 0;
+  
+  const v1 = v11 * (1 - fx) + v21 * fx;
+  const v2 = v12 * (1 - fx) + v22 * fx;
+  
+  return v1 * (1 - fy) + v2 * fy;
+}
+
+// Helper function for smooth path interpolation
+function createSmoothPath(coords, pointsPerSegment = 10) {
+  const result = [];
+  for (let i = 0; i < coords.length - 1; i++) {
+    for (let t = 0; t < pointsPerSegment; t++) {
+      const ratio = t / pointsPerSegment;
+      result.push([
+        coords[i][0] + (coords[i + 1][0] - coords[i][0]) * ratio,
+        coords[i][1] + (coords[i + 1][1] - coords[i][1]) * ratio,
+        coords[i][2] + (coords[i + 1][2] - coords[i][2]) * ratio
+      ]);
+    }
+  }
+  result.push(coords[coords.length - 1]);
+  return result;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const geojsonUrl = 'GeoJSON/Javelina_100.geojson';
+
   let coordinates = [];
   let elevations = [];
   let distances = [];
   let map;
   let isFlying = false;
-  let flyAnimationId = null;
+  let speedMultiplier = 10.0;
+
+  function computeCumulativeDistances(coords) {
+    const dists = [0];
+    let total = 0;
+    for (let i = 1; i < coords.length; i++) {
+      total += turf.distance(
+        turf.point(coords[i - 1]),
+        turf.point(coords[i]),
+        { units: 'kilometers' }
+      ) * 1000;
+      dists.push(total);
+    }
+    return dists;
+  }
+
+  function smoothAngle(current, target, alpha) {
+    let diff = target - current;
+    if (diff > 180) diff -= 360;
+    if (diff < -180) diff += 360;
+    return current + diff * alpha;
+  }
+
+  function sliderToSpeed(sliderValue) {
+    return 0.1 * Math.pow(10, sliderValue / 33.3333);
+  }
 
   fetch(geojsonUrl)
     .then(resp => resp.json())
@@ -130,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
           borderColor: '#4a8a4a',
           borderWidth: 2,
           fill: false,
-          tension: 0.2
+          tension: 0.4
         }]
       },
       options: {
@@ -146,6 +395,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function initMap() {
     if (!coordinates.length) return;
+
+    const INITIAL_PITCH = 50;
 
     map = new maplibregl.Map({
       container: 'map',
@@ -169,16 +420,17 @@ document.addEventListener('DOMContentLoaded', () => {
       },
       center: coordinates[0],
       zoom: 14,
-      pitch: 60,
+      pitch: INITIAL_PITCH,
       bearing: 0,
       maxBounds: [
         [-111.85, 33.62],
         [-111.62, 33.77]
-      ]
+      ],
+      antialias: true,
+      fadeDuration: 300
     });
 
     map.on('load', () => {
-      // Add Terrain-RGB DEM source
       map.addSource('dem', {
         type: 'raster-dem',
         tiles: ['tiles/Javelina_100/{z}/{x}/{y}.png'],
@@ -189,62 +441,80 @@ document.addEventListener('DOMContentLoaded', () => {
         bounds: [-111.808257, 33.649035, -111.671469, 33.740898]
       });
 
-      // Set terrain AFTER adding hillshade
       map.setTerrain({
         source: 'dem',
-        exaggeration: 1.2
+        exaggeration: 2.0
       });
 
-      // Add hillshade layer on top of everything for visibility
+      map.addSource('satellite', {
+        type: 'raster',
+        tiles: ['https://mt1.google.com/vt/lyrs=s&x={x}&y={y}&z={z}'],
+        tileSize: 256,
+        attribution: '© Google'
+      });
+      
+      map.addLayer({
+        id: 'satellite-layer',
+        type: 'raster',
+        source: 'satellite',
+        paint: {
+          'raster-opacity': 1.0,
+          'raster-resampling': 'linear',
+          'raster-fade-duration': 300
+        }
+      });
+
       map.addLayer({
         id: 'hillshade',
         type: 'hillshade',
         source: 'dem',
         paint: {
-          'hillshade-exaggeration': 0.25,
+          'hillshade-exaggeration': 0.5,
           'hillshade-shadow-color': '#000000',
           'hillshade-highlight-color': '#ffffff',
-          'hillshade-accent-color': '#999999'
+          'hillshade-accent-color': '#666666',
+          'hillshade-illumination-direction': 315
         }
       });
 
-      // Add the track as a thick, bright line
       map.addSource('track', {
         type: 'geojson',
         data: { type: "Feature", geometry: { type: "LineString", coordinates } }
       });
 
-      // Add track outline (white) for visibility
       map.addLayer({
         id: 'track-outline',
         type: 'line',
         source: 'track',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        layout: { 
+          'line-join': 'round', 
+          'line-cap': 'round' 
+        },
         paint: { 
           'line-color': '#ffffff', 
-          'line-width': 8,
-          'line-opacity': 0.8
+          'line-width': 7,
+          'line-opacity': 0.95
         }
       });
 
-      // Add track line (red) on top
       map.addLayer({
         id: 'track-line',
         type: 'line',
         source: 'track',
-        layout: { 'line-join': 'round', 'line-cap': 'round' },
+        layout: { 
+          'line-join': 'round', 
+          'line-cap': 'round' 
+        },
         paint: { 
           'line-color': '#ff0000', 
-          'line-width': 5
+          'line-width': 4
         }
       });
 
-      // Setup flythrough controls
       setupFlythroughControls();
     });
 
     map.on('error', (e) => {
-      // Silently handle missing tile errors
       if (e.error && e.error.status === 404) return;
       console.error('Map error:', e.error);
     });
@@ -253,96 +523,182 @@ document.addEventListener('DOMContentLoaded', () => {
   function setupFlythroughControls() {
     const toggleBtn = document.getElementById('toggleFly');
     const progressText = document.getElementById('progressText');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedValue = document.getElementById('speedValue');
+    const resetBtn = document.getElementById('resetBtn');
+    const toggleMinimize = document.getElementById('toggleMinimize');
+    const controlsPanel = document.getElementById('controls');
+    
+    // Camera wheel buttons
+    const wheelForward = document.getElementById('wheelForward');
+    const wheelBack = document.getElementById('wheelBack');
+    const wheelRotLeft = document.getElementById('wheelRotLeft');
+    const wheelRotRight = document.getElementById('wheelRotRight');
+    
+    // Zoom buttons
+    const zoomIn = document.getElementById('zoomIn');
+    const zoomOut = document.getElementById('zoomOut');
 
-    // Smooth and simplify the coordinate path
-    const smoothedCoords = smoothPath(coordinates, 30); // Average every 30 points for slower motion
+    let currentZoom = 14.8;
+    const LOCKED_PITCH = 50;
 
     let idx = 0;
-    const pointsPerFrame = 1; // Move 1 smoothed point per frame
-    const frameDuration = 450; // Much slower - 150ms per frame
-    let currentBearing = 0; // Track bearing for smooth transitions
+    let currentBearing = 0;
+    let userYawOffset = 0;
+    let lastTime = null;
 
-    function smoothPath(coords, windowSize) {
-      const smoothed = [];
-      for (let i = 0; i < coords.length; i += windowSize) {
-        const window = coords.slice(i, Math.min(i + windowSize, coords.length));
-        const avgLon = window.reduce((sum, c) => sum + c[0], 0) / window.length;
-        const avgLat = window.reduce((sum, c) => sum + c[1], 0) / window.length;
-        smoothed.push([avgLon, avgLat]);
+    toggleMinimize.addEventListener('click', () => {
+      controlsPanel.classList.toggle('minimized');
+      toggleMinimize.textContent =
+        controlsPanel.classList.contains('minimized') ? '⚙' : '✕';
+    });
+
+    speedSlider.addEventListener('input', e => {
+      speedMultiplier = sliderToSpeed(+e.target.value);
+      speedValue.textContent = speedMultiplier.toFixed(1) + 'x';
+    });
+
+    resetBtn.addEventListener('click', () => {
+      idx = 0;
+      currentBearing = 0;
+      userYawOffset = 0;
+      currentZoom = 14.8;
+      map.flyTo({
+        center: coordinates[0],
+        zoom: currentZoom,
+        pitch: LOCKED_PITCH,
+        bearing: 0,
+        duration: 1200
+      });
+    });
+    
+    // Camera wheel controls
+    wheelForward.addEventListener('click', () => {
+      idx = Math.min(idx + 100, smoothedCoords.length - 2);
+    });
+    
+    wheelBack.addEventListener('click', () => {
+      idx = Math.max(idx - 100, 0);
+    });
+    
+    wheelRotLeft.addEventListener('click', () => {
+      userYawOffset -= 10;
+      userYawOffset = Math.max(-90, userYawOffset);
+    });
+    
+    wheelRotRight.addEventListener('click', () => {
+      userYawOffset += 10;
+      userYawOffset = Math.min(90, userYawOffset);
+    });
+    
+    // Zoom controls
+    zoomIn.addEventListener('click', () => {
+      currentZoom = Math.min(currentZoom + 0.5, 18);
+      map.easeTo({ zoom: currentZoom, duration: 300 });
+    });
+    
+    zoomOut.addEventListener('click', () => {
+      currentZoom = Math.max(currentZoom - 0.5, 12);
+      map.easeTo({ zoom: currentZoom, duration: 300 });
+    });
+
+    const smoothedCoords = createSmoothPath(coordinates, 100);
+    const smoothedDistances = computeCumulativeDistances(smoothedCoords);
+
+    function findIndexAtDistance(targetDist) {
+      let lo = 0, hi = smoothedDistances.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        smoothedDistances[mid] < targetDist ? (lo = mid + 1) : (hi = mid);
       }
-      return smoothed;
+      return lo;
     }
 
-    function startFlythrough() {
-      if (isFlying) {
+    function averagedBearing(i, lookaheadMeters = 5000, samples = 50) {
+      const startDist = smoothedDistances[i];
+      let x = 0, y = 0;
+
+      for (let s = 1; s <= samples; s++) {
+        const d = startDist + (s / samples) * lookaheadMeters;
+        const j = findIndexAtDistance(d);
+        if (j >= smoothedCoords.length) break;
+
+        const b = turf.bearing(
+          turf.point(smoothedCoords[i]),
+          turf.point(smoothedCoords[j])
+        ) * Math.PI / 180;
+
+        x += Math.cos(b);
+        y += Math.sin(b);
+      }
+      return Math.atan2(y, x) * 180 / Math.PI;
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'ArrowLeft') {
+        userYawOffset -= 5;
+        userYawOffset = Math.max(-90, userYawOffset);
+      }
+      if (e.code === 'ArrowRight') {
+        userYawOffset += 5;
+        userYawOffset = Math.min(90, userYawOffset);
+      }
+    });
+
+    function animate(now) {
+      if (!isFlying) return;
+
+      if (!lastTime) lastTime = now;
+      const dt = (now - lastTime) / 1000;
+      lastTime = now;
+
+      idx += speedMultiplier * dt * 25;
+      if (idx >= smoothedCoords.length - 2) {
         stopFlythrough();
         return;
       }
 
+      const i = Math.floor(idx);
+      const lookahead = Math.min(5000, 2000 + speedMultiplier * 100);
+      const targetBearing = averagedBearing(i, lookahead);
+
+      const alpha = 1 - Math.exp(-dt * 0.2);
+      currentBearing = smoothAngle(currentBearing, targetBearing, alpha);
+
+      map.easeTo({
+        center: smoothedCoords[i],
+        bearing: currentBearing + userYawOffset,
+        zoom: currentZoom,
+        pitch: LOCKED_PITCH,
+        duration: 0
+      });
+
+      progressText.textContent =
+        ((idx / smoothedCoords.length) * 100).toFixed(1) +
+        `% | ${speedMultiplier.toFixed(1)}x`;
+
+      requestAnimationFrame(animate);
+    }
+
+    function startFlythrough() {
+      if (isFlying) return stopFlythrough();
       isFlying = true;
-      toggleBtn.textContent = 'Stop Flythrough';
+      lastTime = null;
+      toggleBtn.textContent = '⏸ Pause';
       toggleBtn.classList.add('active');
-      idx = 0;
-
-      function animate() {
-        if (!isFlying || idx >= smoothedCoords.length - 1) {
-          stopFlythrough();
-          return;
-        }
-
-        const [lon, lat] = smoothedCoords[idx];
-        const nextIdx = Math.min(idx + 3, smoothedCoords.length - 1);
-        const [lonNext, latNext] = smoothedCoords[nextIdx];
-
-        // Calculate bearing and smooth it
-        const targetBearing = turf.bearing(
-          turf.point([lon, lat]),
-          turf.point([lonNext, latNext])
-        );
-        
-        // Smooth bearing transitions (avoid jumps)
-        let bearingDiff = targetBearing - currentBearing;
-        if (bearingDiff > 180) bearingDiff -= 360;
-        if (bearingDiff < -180) bearingDiff += 360;
-        currentBearing += bearingDiff * 0.3; // Smooth transition
-
-        // Update progress
-        const progress = ((idx / smoothedCoords.length) * 100).toFixed(1);
-        progressText.textContent = `Progress: ${progress}%`;
-
-        // Smooth camera movement with higher altitude and moderate pitch
-        map.easeTo({
-          center: [lon, lat],
-          bearing: currentBearing,
-          pitch: 62, // Moderate pitch for better view
-          zoom: 15.8, // Pulled back slightly for smoother terrain
-          duration: frameDuration,
-          easing: t => t * (2 - t) // Ease-out for smoother motion
-        });
-
-        idx += pointsPerFrame;
-        flyAnimationId = setTimeout(animate, frameDuration);
-      }
-
-      animate();
+      requestAnimationFrame(animate);
     }
 
     function stopFlythrough() {
       isFlying = false;
-      toggleBtn.textContent = 'Start Flythrough';
+      toggleBtn.textContent = '▶ Start';
       toggleBtn.classList.remove('active');
-      progressText.textContent = 'Paused';
-      if (flyAnimationId) {
-        clearTimeout(flyAnimationId);
-        flyAnimationId = null;
-      }
     }
 
     toggleBtn.addEventListener('click', startFlythrough);
 
-    // Allow spacebar to toggle
-    document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space' && e.target.tagName !== 'INPUT') {
         e.preventDefault();
         startFlythrough();
       }
