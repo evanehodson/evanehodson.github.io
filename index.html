@@ -246,6 +246,8 @@
       <div class="divider"></div>
       
       <button id="toggleMinimize" class="icon">⚙</button>
+
+      <button id="fullscreenBtn" class="icon">⛶</button>
     </div>
     
     <!-- Camera Control Wheel -->
@@ -414,18 +416,15 @@ document.addEventListener('DOMContentLoaded', () => {
           id: 'osm',
           type: 'raster',
           source: 'osm',
-          minzoom: 0,
-          maxzoom: 22
+          minzoom: 0, // allow fully zoomed out
+          maxzoom: 19 // allow max zoom in
         }]
       },
       center: coordinates[0],
-      zoom: 14,
+      zoom: 13,
       pitch: INITIAL_PITCH,
       bearing: 0,
-      maxBounds: [
-        [-111.85, 33.62],
-        [-111.62, 33.77]
-      ],
+      maxBounds: null, // remove bounds if you want full freedom
       antialias: true,
       fadeDuration: 300
     });
@@ -435,15 +434,15 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'raster-dem',
         tiles: ['tiles/Javelina_100/{z}/{x}/{y}.png'],
         tileSize: 256,
-        minzoom: 12,
-        maxzoom: 16,
+        minzoom: 0,
+        maxzoom: 15,
         encoding: 'mapbox',
         bounds: [-111.808257, 33.649035, -111.671469, 33.740898]
       });
 
       map.setTerrain({
         source: 'dem',
-        exaggeration: 2.0
+        exaggeration: 3.0
       });
 
       map.addSource('satellite', {
@@ -458,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'raster',
         source: 'satellite',
         paint: {
-          'raster-opacity': 1.0,
+          'raster-opacity': 0.6,
           'raster-resampling': 'linear',
           'raster-fade-duration': 300
         }
@@ -469,7 +468,7 @@ document.addEventListener('DOMContentLoaded', () => {
         type: 'hillshade',
         source: 'dem',
         paint: {
-          'hillshade-exaggeration': 0.5,
+          'hillshade-exaggeration': 1.0,
           'hillshade-shadow-color': '#000000',
           'hillshade-highlight-color': '#ffffff',
           'hillshade-accent-color': '#666666',
@@ -527,6 +526,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const speedValue = document.getElementById('speedValue');
     const resetBtn = document.getElementById('resetBtn');
     const toggleMinimize = document.getElementById('toggleMinimize');
+    const fullscreenBtn = document.getElementById('fullscreenBtn');
     const controlsPanel = document.getElementById('controls');
     
     // Camera wheel buttons
@@ -539,7 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const zoomIn = document.getElementById('zoomIn');
     const zoomOut = document.getElementById('zoomOut');
 
-    let currentZoom = 14.8;
+    let currentZoom = 13;
     const LOCKED_PITCH = 50;
 
     let idx = 0;
@@ -553,6 +553,16 @@ document.addEventListener('DOMContentLoaded', () => {
         controlsPanel.classList.contains('minimized') ? '⚙' : '✕';
     });
 
+    fullscreenBtn.addEventListener('click', () => {
+      if (!document.fullscreenElement) {
+        document.getElementById('map').requestFullscreen();
+        fullscreenBtn.textContent = '🡽'; // change icon to indicate exit
+      } else {
+        document.exitFullscreen();
+        fullscreenBtn.textContent = '⛶';
+      }
+    });
+
     speedSlider.addEventListener('input', e => {
       speedMultiplier = sliderToSpeed(+e.target.value);
       speedValue.textContent = speedMultiplier.toFixed(1) + 'x';
@@ -562,7 +572,7 @@ document.addEventListener('DOMContentLoaded', () => {
       idx = 0;
       currentBearing = 0;
       userYawOffset = 0;
-      currentZoom = 14.8;
+      currentZoom = 13;
       map.flyTo({
         center: coordinates[0],
         zoom: currentZoom,
@@ -593,12 +603,12 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Zoom controls
     zoomIn.addEventListener('click', () => {
-      currentZoom = Math.min(currentZoom + 0.5, 18);
+      currentZoom = Math.min(currentZoom + 0.5, 16);
       map.easeTo({ zoom: currentZoom, duration: 300 });
     });
     
     zoomOut.addEventListener('click', () => {
-      currentZoom = Math.max(currentZoom - 0.5, 12);
+      currentZoom = Math.max(currentZoom - 0.5, 10);
       map.easeTo({ zoom: currentZoom, duration: 300 });
     });
 
